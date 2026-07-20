@@ -1,0 +1,3 @@
+display_name: 中国风颜色参考
+short_description: 从色卡图片识别中文颜色名并提供 HEX/RGB 中国风配色参考
+default_prompt: 请从图片色卡中逐行识别颜色名、HEX 和 RGB，并结合中国风审美给出可用色板。
