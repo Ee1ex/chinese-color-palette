@@ -46,6 +46,8 @@
   "name_zh": "牙色",
   "hex": "#EFDEB0",
   "rgb": {"r": 239, "g": 222, "b": 176},
+  "category": "黄",
+  "pinyin": "yase",
   "source": {"file": "source.jpg", "row": 2},
   "needs_review": false,
   "aliases": []
@@ -66,28 +68,32 @@
 
 ```text
 chinese-color-palette/
+├─ Makefile                      # 本地维护入口（validate / render / test / all）
 ├─ SKILL.md
 ├─ README.md
-├─ agents/openai.yaml
+├─ agents/openai.yaml            # Codex 专属 UI 元数据（其他运行时忽略）
 ├─ references/
 │  ├─ palette.json
 │  └─ palette.md
 └─ scripts/
-   ├─ validate_palette.py
-   └─ render_palette.py
+   ├─ validate_palette.py        # 校验字段/HEX/RGB/category、去重
+   ├─ render_palette.py          # 由 palette.json 重新生成 palette.md
+   ├─ test_validate_palette.py   # 校验逻辑单测
+   ├─ test_palette_data.py       # 数据完整性单测
+   └─ test_palette_markdown.py   # Markdown 与 JSON 一致性单测
 ```
 
 ### `references/palette.json`
 
-完整的机器可读颜色库，包含颜色名、HEX、RGB、来源、别名和复核状态。
+完整的机器可读颜色库，包含颜色名、HEX、RGB、色系（category）、来源、别名和复核状态。
 
 ### `references/palette.md`
 
-完整的人工浏览版颜色索引。
+完整的人工浏览版颜色索引（含色系列），由 `render_palette.py` 生成，请勿手改。
 
 ### `scripts/validate_palette.py`
 
-检查颜色记录的字段、HEX 格式、RGB 范围以及 HEX 与 RGB 的一致性：
+检查颜色记录的字段、HEX 格式、RGB 范围、category 取值以及 HEX 与 RGB 的一致性；并对同名异色（同一传统色名映射到不同 HEX）输出复核提醒。
 
 ```powershell
 python scripts/validate_palette.py references/palette.json
@@ -95,18 +101,38 @@ python scripts/validate_palette.py references/palette.json
 
 ### `scripts/render_palette.py`
 
-根据 `palette.json` 重新生成 `references/palette.md`：
+根据 `palette.json` 重新生成 `references/palette.md`。脚本基于自身位置解析路径，因此可从任意目录运行：
 
 ```powershell
 python scripts/render_palette.py
 ```
 
+### 使用 Makefile（可选）
+
+提供统一维护入口，等价于分别运行上面的校验、渲染与测试：
+
+```text
+make validate    # 校验 palette.json 的字段 / HEX / RGB / 分类 / 重名
+make render      # 重新生成 palette.md
+make test        # 运行 scripts/ 下的单元测试
+make all         # 依次执行 validate -> render -> test
+```
+
+### 运行全部测试
+
+```powershell
+python -m unittest discover -s scripts -p "test_*.py"
+```
+
 ## 数据说明
 
 - 颜色名默认保留图片中的原始中文名称。
+- `category` 由 HEX 色相自动推导，用于按色系筛选，不代表文化考据分类。
+- `pinyin` 为颜色名拼音（离线静态生成），用于拼音检索，不影响原始色名。
 - `HEX` 统一使用大写 `#RRGGBB` 格式。
 - `RGB` 顺序固定为 `R, G, B`。
 - `needs_review: true` 表示图片内容存在低清、歧义或 HEX/RGB 矛盾，使用时应提示人工复核。
+- 同名异色（如两个来源都叫「黛」但 HEX 不同）属正常情况，校验会给出提醒但不报错；必要时可在 `aliases` 中标注区分。
 - 当前色库来自提供的色卡图片，不等同于完整的中国传统色标准库。
 
 ## License

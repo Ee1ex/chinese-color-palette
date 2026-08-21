@@ -8,9 +8,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
-
 HEX_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
-REQUIRED_FIELDS = ("name_zh", "hex", "rgb", "source", "needs_review", "aliases")
+REQUIRED_FIELDS = ("name_zh", "hex", "rgb", "source", "needs_review", "aliases", "category")
+CATEGORIES = {"红", "橙", "黄", "绿", "青", "蓝", "紫", "棕", "灰", "白", "黑"}
 
 
 def _error(index: int, message: str) -> str:
@@ -36,6 +36,10 @@ def validate_palette(records: Any) -> list[str]:
         name = record["name_zh"]
         if not isinstance(name, str) or not name.strip():
             errors.append(_error(index, "name_zh must be a non-empty string"))
+
+        category = record["category"]
+        if not isinstance(category, str) or category not in CATEGORIES:
+            errors.append(_error(index, f"category must be one of {sorted(CATEGORIES)}"))
 
         hex_value = record["hex"]
         if not isinstance(hex_value, str) or not HEX_RE.fullmatch(hex_value):
@@ -76,6 +80,33 @@ def validate_palette(records: Any) -> list[str]:
     return errors
 
 
+def find_duplicate_names(records: Any) -> list[str]:
+    """Return non-fatal warnings for the same color name mapped to different HEX.
+
+    Same name with a different HEX usually means two shades share a traditional
+    name across cards; keep both but make the ambiguity visible for review.
+    """
+    warnings: list[str] = []
+    seen: dict[str, str] = {}
+    if not isinstance(records, list):
+        return warnings
+    for index, record in enumerate(records, start=1):
+        if not isinstance(record, dict):
+            continue
+        name = record.get("name_zh")
+        hex_value = record.get("hex")
+        if not isinstance(name, str) or not isinstance(hex_value, str):
+            continue
+        if name in seen and seen[name].upper() != hex_value.upper():
+            warnings.append(
+                f"warning: record {index}: 同名异色 '{name}' "
+                f"({seen[name]} vs {hex_value}) —— 请确认是不同色阶还是需区分命名"
+            )
+        else:
+            seen[name] = hex_value
+    return warnings
+
+
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
     if len(args) != 1:
@@ -89,6 +120,11 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     errors = validate_palette(records)
+    warnings = find_duplicate_names(records)
+    if warnings:
+        print("颜色库复核提醒：", file=sys.stderr)
+        print("\n".join(warnings), file=sys.stderr)
+
     if errors:
         print("颜色库校验失败：")
         print("\n".join(errors))

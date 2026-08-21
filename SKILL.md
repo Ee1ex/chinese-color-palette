@@ -23,17 +23,23 @@ description: Use when extracting color names and HEX/RGB values from color-table
   "name_zh": "牙色",
   "hex": "#EFDEB0",
   "rgb": {"r": 239, "g": 222, "b": 176},
+  "category": "黄",
+  "pinyin": "yase",
   "source": {"file": "source.jpg", "row": 2},
   "needs_review": false,
   "aliases": []
 }
 ```
 
+`category` 由 HEX 色相自动推导，取值为 `红 / 橙 / 黄 / 绿 / 青 / 蓝 / 紫 / 棕 / 灰 / 白 / 黑`，用于按色系快速筛选；它代表视觉色系，不代表文化考据分类。
+
+`pinyin` 为颜色名的拼音（离线静态生成，便于拼音检索），不影响原始色名。
+
 新增或修改色库后，运行 `scripts/validate_palette.py references/palette.json`。只有已标记 `needs_review` 的截图矛盾记录可以保留不一致；其他记录必须通过 HEX↔RGB 校验。
 
 ## 选择中国风配色
 
-需要中国风、国风、东方审美、传统色或古典配色时，先读取 `references/palette.json`，再按任务选择 3–6 个角色：主色、辅色、强调色、背景色、文字色。优先使用库内原始颜色名，并同时给出 HEX 和 RGB。
+需要中国风、国风、东方审美、传统色或古典配色时，先读取 `references/palette.json`，再按任务选择 3–6 个角色：主色、辅色、强调色、背景色、文字色。优先使用库内原始颜色名，并同时给出 HEX 和 RGB。可先用 `category` 字段按色系锁定候选范围（如节庆用 `红`、雅致用 `绿`/`青`、留白用 `白`/`灰`），再在范围内挑选。
 
 - 红、朱、胭脂、绯等暖色适合节庆、印章、强调和视觉焦点。
 - 黛、玄青、墨、藏青等深色适合文字、边框、沉稳背景和高对比层级。
