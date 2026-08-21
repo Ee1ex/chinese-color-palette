@@ -67,7 +67,7 @@
 ## 文件结构
 
 ```text
-chinese-color-palette/
+elx-cncolor/
 ├─ Makefile                      # 本地维护入口（validate / render / test / all）
 ├─ SKILL.md
 ├─ README.md

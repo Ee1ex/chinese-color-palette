@@ -1,5 +1,5 @@
 ---
-name: chinese-color-palette
+name: elx-cncolor
 description: Use when extracting color names and HEX/RGB values from color-table images, selecting Chinese traditional colors, creating Chinese-style palettes, or referencing Chinese-inspired colors for UI, branding, illustration, slides, and visual design.
 ---
 

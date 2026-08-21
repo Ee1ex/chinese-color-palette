@@ -1,5 +1,5 @@
 # 中国风颜色参考库 — 本地维护入口
-# 用法（在 chinese-color-palette/ 目录下）：
+# 用法（在 elx-cncolor/ 目录下）：
 #   make validate   校验 palette.json 的字段 / HEX / RGB / 分类 / 重名
 #   make render     由 palette.json 重新生成 palette.md
 #   make test       运行 scripts/ 下的单元测试
